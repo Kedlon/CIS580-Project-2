@@ -10,16 +10,29 @@ using Microsoft.Xna.Framework.Content;
 
 namespace Dodgeball
 {
+
     /// <summary>
-    /// An enum representing the states the player can be in
+    /// An enumeration of possible player animation states
     /// </summary>
-    enum State
+    enum PlayerAnimState
     {
-        South = 0,
-        East = 1,
-        West = 2,
-        North = 3,
-        Idle = 4,
+        Idle,
+        JumpingLeft,
+        JumpingRight,
+        WalkingLeft,
+        WalkingRight,
+        FallingLeft,
+        FallingRight
+    }
+
+    /// <summary>
+    /// An enumeration of possible player veritcal movement states
+    /// </summary>
+    enum VerticalMovementState
+    {
+        OnGround,
+        Jumping,
+        Falling
     }
 
     public class Player
@@ -28,12 +41,17 @@ namespace Dodgeball
         /// <summary>
         /// How quickly the animation should advance frames (1/8 second as milliseconds)
         /// </summary>
-        const int ANIMATION_FRAME_RATE = 124;
+        const int FRAME_RATE = 124;
+
+        /// <summary>
+        /// The duration of a player's jump, in milliseconds
+        /// </summary>
+        const int JUMP_TIME = 500;
 
         /// <summary>
         /// How quickly the player should move
         /// </summary>
-        const float PLAYER_SPEED = 300;
+        const int PLAYER_SPEED = 3;
 
         /// <summary>
         /// The width of the animation frames
@@ -46,170 +64,205 @@ namespace Dodgeball
         const int FRAME_HEIGHT = 64;
 
         /// <summary>
-        /// The game object
+        /// The currently rendered frame
         /// </summary>
-        Game1 game;
+        int currentFrame = 0;
+
+        /// <summary>
+        /// A timer for jumping
+        /// </summary>
+        TimeSpan jumpTimer;
+
+        /// <summary>
+        /// The player sprite frames
+        /// </summary>
+        Sprite[] frames;
+
+        /// <summary>
+        /// The player's animation state
+        /// </summary>
+        PlayerAnimState animationState = PlayerAnimState.Idle;
+
+        /// <summary>
+        /// The player's vertical movement state
+        /// </summary>
+        VerticalMovementState verticalState = VerticalMovementState.OnGround;
+
+        // A timer for animations
+        TimeSpan animationTimer;
+
+        /// <summary>
+        /// The currently applied SpriteEffects
+        /// </summary>
+        SpriteEffects spriteEffects = SpriteEffects.None;
+
+        /// <summary>
+        /// The color of the sprite
+        /// </summary>
+        Color color = Color.White;
+
+        /// <summary>
+        /// The origin of the sprite (centered on its feet)
+        /// </summary>
+        Vector2 origin = new Vector2(10, 21);
+
+        /// <summary>
+        /// Gets and sets the position of the player on-screen
+        /// </summary>
+        public Vector2 Position = new Vector2(200, 200);
 
         /// <summary>
         /// The Bounds for this player
         /// </summary>
-        public BoundingRectangle Bounds;
+        public BoundingRectangle Bounds => new BoundingRectangle(Position - 1.8f * origin, 38, 41);
 
-        /// <summary>
-        /// used for positioning the character sprite
-        /// </summary>
-        public Vector2 position;
-
-        /// <summary>
-        /// The Texture for this player
-        /// </summary>
-        Texture2D texture;
-
-        /// <summary>
-        /// Other variables for the animation of the player model
-        /// </summary>
-        State state;
-        TimeSpan timer;
-        int frame;
-        SpriteFont font;
+        
+        
 
         /// <summary>
         /// Creates a player
         /// </summary>
         /// <param name="game">The game this player belongs to</param>
-        public Player(Game1 game)
+        public Player(IEnumerable<Sprite> frames)
         {
-            this.game = game;
-            timer = new TimeSpan(0);
-            state = State.Idle;
+            this.frames = frames.ToArray();
+            animationState = PlayerAnimState.WalkingLeft;
         }
 
         /// <summary>
-        /// Sets the players initial size, bounds, and position on the screen.
-        /// </summary>
-        public void Initialize()
-        {
-            Bounds.Width = FRAME_WIDTH;
-            Bounds.Height = FRAME_HEIGHT;
-            Bounds.X = 0;
-            Bounds.Y = game.GraphicsDevice.Viewport.Height / 2 - Bounds.Height / 2;
-            position = new Vector2(Bounds.X, Bounds.Y);
-        }
-
-        /// <summary>
-        /// loads the content related to the player
-        /// </summary>
-        /// <param name="content">The ContentManager to use</param>
-        public void LoadContent(ContentManager content)
-        {
-            texture = content.Load<Texture2D>("spritesheet");
-            font = content.Load<SpriteFont>("defaultFont");
-        }
-
-        /// <summary>
-        /// Updates the state of the player
+        /// Updates the state of the player, as well as movement, physics, and other aspects of the player.
         /// </summary>
         /// <param name="gameTime">The game's GameTime</param>
         public void Update(GameTime gameTime)
         {
             var keyboardState = Keyboard.GetState();
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            UpdateVertical(gameTime, keyboardState);
+            UpdateHorizontal(gameTime, keyboardState);
+            ApplyAnimations(gameTime);
+        }
 
-            if (keyboardState.IsKeyDown(Keys.Up))
+        /// <summary>
+        /// Render the player sprite.  Should be invoked between 
+        /// SpriteBatch.Begin() and SpriteBatch.End()
+        /// </summary>
+        /// <param name="spriteBatch">The SpriteBatch to use</param>
+        public void Draw(SpriteBatch spriteBatch)
+        {
+#if VISUAL_DEBUG 
+            VisualDebugging.DrawRectangle(spriteBatch, Bounds, Color.Red);
+#endif
+            frames[currentFrame].Draw(spriteBatch, Position, color, 0, origin, 2, spriteEffects, 1);
+        }
+
+
+        /// <summary>
+        /// checks and updates the player's vertical movement.
+        /// NOTE: MEANT TO BE USED IN THE UPDATE METHOD ONLY.
+        /// </summary>
+        /// <param name="gameTime">the current game time.</param>
+        /// <param name="keyboard">the state of the keyboard.</param>
+        private void UpdateVertical(GameTime gameTime, KeyboardState keyboard)
+        {
+            switch (verticalState)
             {
-                // move up
-                state = State.North;
-                position.Y -= delta * PLAYER_SPEED;
-                Bounds.Y -= delta * PLAYER_SPEED;
+                case VerticalMovementState.OnGround:
+                    if (keyboard.IsKeyDown(Keys.Space))
+                    {
+                        verticalState = VerticalMovementState.Jumping;
+                        jumpTimer = new TimeSpan(0);
+                    }
+                    break;
+                case VerticalMovementState.Jumping:
+                    jumpTimer += gameTime.ElapsedGameTime;
+                    // Simple jumping with platformer physics
+                    Position.Y -= (250 / (float)jumpTimer.TotalMilliseconds);
+                    if (jumpTimer.TotalMilliseconds >= JUMP_TIME) verticalState = VerticalMovementState.Falling;
+                    break;
+                case VerticalMovementState.Falling:
+                    Position.Y += PLAYER_SPEED;
+                    // TODO: This needs to be replaced with collision logic
+                    if (Position.Y > 500)
+                    {
+                        Position.Y = 500;
+                    }
+                    break;
             }
-            else if (keyboardState.IsKeyDown(Keys.Down))
+        }
+
+        /// <summary>
+        /// checks and updates the player's horizontal movement.
+        /// NOTE: MEANT TO BE USED IN THE UPDATE METHOD ONLY.
+        /// </summary>
+        /// <param name="gameTime">the current game time.</param>
+        /// <param name="keyboard">the state of the keyboard.</param>
+        private void UpdateHorizontal(GameTime gameTime, KeyboardState keyboard)
+        {
+            if (keyboard.IsKeyDown(Keys.Left))
             {
-                // move down
-                state = State.South;
-                position.Y += delta * PLAYER_SPEED;
-                Bounds.Y += delta * PLAYER_SPEED;
+                if (verticalState == VerticalMovementState.Jumping || verticalState == VerticalMovementState.Falling)
+                    animationState = PlayerAnimState.JumpingLeft;
+                else animationState = PlayerAnimState.WalkingLeft;
+                Position.X -= PLAYER_SPEED;
             }
-            else if (keyboardState.IsKeyDown(Keys.Left))
+            else if (keyboard.IsKeyDown(Keys.Right))
             {
-                // move left
-                state = State.West;
-                position.X -= delta * PLAYER_SPEED;
-                Bounds.X -= delta * PLAYER_SPEED;
-            }
-            else if (keyboardState.IsKeyDown(Keys.Right))
-            {
-                // move right
-                state = State.East;
-                position.X += delta * PLAYER_SPEED;
-                Bounds.X += delta * PLAYER_SPEED;
+                if (verticalState == VerticalMovementState.Jumping || verticalState == VerticalMovementState.Falling)
+                    animationState = PlayerAnimState.JumpingRight;
+                else animationState = PlayerAnimState.WalkingRight;
+                Position.X += PLAYER_SPEED;
             }
             else
             {
-                state = State.Idle;
+                animationState = PlayerAnimState.Idle;
             }
-
-            //checks if player collides with walls of the viewport
-            if (Bounds.Y < 0)
-            {
-                Bounds.Y = 0;
-                position.Y = 0;
-            }
-            if (Bounds.Y > game.GraphicsDevice.Viewport.Height - Bounds.Height)
-            {
-                Bounds.Y = game.GraphicsDevice.Viewport.Height - Bounds.Height;
-                position.Y = game.GraphicsDevice.Viewport.Height - Bounds.Height;
-            }
-            if (Bounds.X < 0)
-            {
-                Bounds.X = 0;
-                position.X = 0;
-            }
-            UpdateAnimation(gameTime);
         }
 
         /// <summary>
-        /// Draws the player
+        /// Applies animations to the player
         /// </summary>
-        /// <param name="spriteBatch">
-        /// The SpriteBatch to draw the player with.  This method should 
-        /// be invoked between SpriteBatch.Begin() and SpriteBatch.End() calls.
-        /// </param>
-        public void Draw(SpriteBatch spriteBatch)
+        /// <param name="gameTime">The current game time.</param>
+        private void ApplyAnimations(GameTime gameTime)
         {
-            // determine the source rectagle of the sprite's current frame
-            var source = new Rectangle(
-                frame * FRAME_WIDTH, // X value 
-                (int)state % 4 * FRAME_HEIGHT, // Y value
-                FRAME_WIDTH, // Width 
-                FRAME_HEIGHT // Height
-                );
-
-            // render the sprite
-            spriteBatch.Draw(texture, position, source, Color.White);
-        }
-
-        /// <summary>
-        /// updates the animation for the player, used within the Update() method.
-        /// </summary>
-        /// <param name="gameTime">the game's gameTime</param>
-        private void UpdateAnimation(GameTime gameTime)
-        {
-            // Update the player animation timer when the player is moving
-            if (state != State.Idle) timer += gameTime.ElapsedGameTime;
-
-            // Determine the frame should increase.  Using a while 
-            // loop will accomodate the possiblity the animation should 
-            // advance more than one frame.
-            while (timer.TotalMilliseconds > ANIMATION_FRAME_RATE)
+            switch (animationState)
             {
-                // increase by one frame
-                frame++;
-                // reduce the timer by one frame duration
-                timer -= new TimeSpan(0, 0, 0, 0, ANIMATION_FRAME_RATE);
-            }
+                case PlayerAnimState.Idle:
+                    currentFrame = 0;
+                    animationTimer = new TimeSpan(0);
+                    break;
 
-            // Keep the frame within bounds (there are four frames)
-            frame %= 4;
+                case PlayerAnimState.JumpingLeft:
+                    spriteEffects = SpriteEffects.FlipHorizontally;
+                    currentFrame = 7;
+                    break;
+
+                case PlayerAnimState.JumpingRight:
+                    spriteEffects = SpriteEffects.None;
+                    currentFrame = 7;
+                    break;
+
+                case PlayerAnimState.WalkingLeft:
+                    animationTimer += gameTime.ElapsedGameTime;
+                    spriteEffects = SpriteEffects.FlipHorizontally;
+                    // Walking frames are 9 & 10
+                    if (animationTimer.TotalMilliseconds > FRAME_RATE * 2)
+                    {
+                        animationTimer = new TimeSpan(0);
+                    }
+                    currentFrame = (int)Math.Floor(animationTimer.TotalMilliseconds / FRAME_RATE) + 9;
+                    break;
+
+                case PlayerAnimState.WalkingRight:
+                    animationTimer += gameTime.ElapsedGameTime;
+                    spriteEffects = SpriteEffects.None;
+                    // Walking frames are 9 & 10
+                    if (animationTimer.TotalMilliseconds > FRAME_RATE * 2)
+                    {
+                        animationTimer = new TimeSpan(0);
+                    }
+                    currentFrame = (int)Math.Floor(animationTimer.TotalMilliseconds / FRAME_RATE) + 9;
+                    break;
+
+            }
         }
     }
 }

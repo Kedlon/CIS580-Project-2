@@ -167,7 +167,9 @@ namespace Dodgeball
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
+            var offset = new Vector2(200, 300) - player.Position;
+            var t = Matrix.CreateTranslation(offset.X, offset.Y, 0);
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, t);
 
             foreach (Ball item in balls)
             {
