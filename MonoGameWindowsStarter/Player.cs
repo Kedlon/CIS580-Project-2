@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
+using System.Diagnostics;
 
 namespace Dodgeball
 {
@@ -262,6 +262,23 @@ namespace Dodgeball
                     currentFrame = (int)Math.Floor(animationTimer.TotalMilliseconds / FRAME_RATE) + 9;
                     break;
 
+            }
+        }
+
+        public void CheckForPlatformCollision(IEnumerable<IBoundable> platforms)
+        {
+            Debug.WriteLine($"Checking collisions against {platforms.Count()} platforms");
+            if (verticalState != VerticalMovementState.Jumping)
+            {
+                verticalState = VerticalMovementState.Falling;
+                foreach (Platform platform in platforms)
+                {
+                    if (Bounds.CollidesWith(platform.Bounds))
+                    {
+                        Position.Y = platform.Bounds.Y - 1;
+                        verticalState = VerticalMovementState.OnGround;
+                    }
+                }
             }
         }
     }

@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
 
 namespace Dodgeball
 {
@@ -15,26 +18,27 @@ namespace Dodgeball
         /// <summary>
         /// number of balls that will be in the game.
         /// </summary>
-        const int _ballNumber = 3;
+        const int _ballNumber = 0;
 
         private int _lives;
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+        SpriteSheet sheet;
         /// <summary>
         /// variables holding the balls, player, and field line(s) objects.
         /// </summary>
         Ball[] balls = new Ball[_ballNumber];
         Player player;
-        FieldLine centerLine;
-
+         
         /// <summary>
         /// Sound Effect for when a ball collides with the player sprite.
         /// </summary>
         SoundEffect playerHitSFX;
-
         SpriteFont spriteFont;
+
+        List<Platform> platforms;
+        AxisList world;
 
         public Random Random = new Random();
 
@@ -45,12 +49,11 @@ namespace Dodgeball
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            player = new Player(this);
+            platforms = new List<Platform>();
             for(int i = 0; i < _ballNumber; i++)
             {
                 balls[i] = new Ball(this);
             }
-            centerLine = new FieldLine(this);
             _lives = 3;
         }
 
@@ -70,8 +73,6 @@ namespace Dodgeball
             {
                 item.Initialize();
             }
-            player.Initialize();
-            centerLine.Initialize();
             base.Initialize();
         }
 
@@ -87,10 +88,29 @@ namespace Dodgeball
             {
                 item.LoadContent(Content);
             }
-            player.LoadContent(Content);
-            centerLine.LoadContent(Content);
             spriteFont = Content.Load<SpriteFont>("defaultFont");
             playerHitSFX = Content.Load<SoundEffect>("Hit_Player");
+
+            // TODO: use this.Content to load your game content here
+            var t = Content.Load<Texture2D>("spritesheet");
+            sheet = new SpriteSheet(t, 21, 21, 3, 2);
+
+            // Create the player with the corresponding frames from the spritesheet
+            var playerFrames = from index in Enumerable.Range(19, 30) select sheet[index];
+            player = new Player(playerFrames);
+
+            // Create the platforms
+            //platforms.Add(new Platform(new BoundingRectangle(80, 300, 105, 21), sheet[1]));
+            //platforms.Add(new Platform(new BoundingRectangle(280, 400, 84, 21), sheet[2]));
+            //platforms.Add(new Platform(new BoundingRectangle(160, 200, 42, 21), sheet[3]));
+            platforms.Add(new Platform(new BoundingRectangle(0, 500, 2100, 21), sheet[1]));
+
+            // Add the platforms to the axis list
+            world = new AxisList();
+            foreach (Platform platform in platforms)
+            {
+                world.AddGameObject(platform);
+            }
         }
 
         /// <summary>
@@ -122,6 +142,9 @@ namespace Dodgeball
             {
                 player.Update(gameTime);
 
+                var platformQuery = world.QueryRange(player.Bounds.X, player.Bounds.X + player.Bounds.Width);
+                player.CheckForPlatformCollision(platformQuery);
+
                 //update calls for each ball
                 foreach (Ball item in balls)
                 {
@@ -137,12 +160,7 @@ namespace Dodgeball
                     }
                 }
 
-                //checks if the player is trying to pass the center line onto the other side.
-                if (player.Bounds.CollidesWith(centerLine.Bounds))
-                {
-                    player.Bounds.X = (graphics.GraphicsDevice.Viewport.Width / 2) - (centerLine.Bounds.Width * 2);
-                    player.position.X = (graphics.GraphicsDevice.Viewport.Width / 2) - (centerLine.Bounds.Width * 2);
-                }
+                
             }
             //if the player loses
             else
@@ -167,18 +185,33 @@ namespace Dodgeball
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            // Calculate and apply the world/view transform
             var offset = new Vector2(200, 300) - player.Position;
             var t = Matrix.CreateTranslation(offset.X, offset.Y, 0);
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, t);
+
+            // Draw the platforms 
+            var platformQuery = world.QueryRange(player.Position.X - 221, player.Position.X + 400);
+            foreach (Platform platform in platformQuery)
+            {
+                platform.Draw(spriteBatch);
+            }
+            Debug.WriteLine($"{platformQuery.Count()} Platforms rendered");
 
             foreach (Ball item in balls)
             {
                 item.Draw(spriteBatch);
             }
             player.Draw(spriteBatch);
-            centerLine.Draw(spriteBatch);
+
+            // Draw an arbitrary range of sprites
+            for (var i = 17; i < 30; i++)
+            {
+                sheet[i].Draw(spriteBatch, new Vector2(i * 25, 25), Color.White);
+            }
+
             //checks if the game is still active
-            if(_lives != 0)
+            if (_lives != 0)
             {
                 spriteBatch.DrawString(spriteFont, "Lives: " + _lives.ToString(), Vector2.Zero, Color.White);
             }
