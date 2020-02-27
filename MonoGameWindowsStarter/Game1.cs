@@ -18,7 +18,7 @@ namespace Dodgeball
         /// <summary>
         /// number of balls that will be in the game.
         /// </summary>
-        const int _ballNumber = 0;
+        const int _ballNumber = 3;
 
         private int _lives;
 
@@ -186,7 +186,7 @@ namespace Dodgeball
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // Calculate and apply the world/view transform
-            var offset = new Vector2(200, 300) - player.Position;
+            var offset = new Vector2(400, 400) - player.Position;
             var t = Matrix.CreateTranslation(offset.X, offset.Y, 0);
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, t);
 
@@ -210,14 +210,15 @@ namespace Dodgeball
                 sheet[i].Draw(spriteBatch, new Vector2(i * 25, 25), Color.White);
             }
 
+            var textPosition = new Vector2(player.Position.X - 300, player.Position.Y - 375);
             //checks if the game is still active
             if (_lives != 0)
             {
-                spriteBatch.DrawString(spriteFont, "Lives: " + _lives.ToString(), Vector2.Zero, Color.White);
+                spriteBatch.DrawString(spriteFont, "Lives: " + _lives.ToString(), textPosition, Color.White);
             }
             else
             {
-                spriteBatch.DrawString(spriteFont, "Game Over, please close the game.", Vector2.Zero, Color.White);
+                spriteBatch.DrawString(spriteFont, "Game Over, please close the game.", textPosition, Color.White);
             }
 
             spriteBatch.End();
