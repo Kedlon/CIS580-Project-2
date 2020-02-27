@@ -59,7 +59,7 @@
 #begin spritesheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyColor=94,129,162,255
 /processorParam:ColorKeyEnabled=True
 /processorParam:GenerateMipmaps=False
 /processorParam:PremultiplyAlpha=True

@@ -96,7 +96,7 @@ namespace Dodgeball
             sheet = new SpriteSheet(t, 21, 21, 3, 2);
 
             // Create the player with the corresponding frames from the spritesheet
-            var playerFrames = from index in Enumerable.Range(19, 30) select sheet[index];
+            var playerFrames = from index in Enumerable.Range(49, 60) select sheet[index];
             player = new Player(playerFrames);
 
             // Create the platforms
