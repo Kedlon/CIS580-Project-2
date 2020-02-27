@@ -26,6 +26,21 @@ namespace Dodgeball
         }
 
         /// <summary>
+        /// Constructs a new bounding rectangle.  This class is similar to a rectangle,
+        /// but uses floats
+        /// </summary>
+        /// <param name="position">The upper-left corner's position</param>
+        /// <param name="width">The width of the rectangle</param>
+        /// <param name="height">The height of the rectangle</param>
+        public BoundingRectangle(Vector2 position, float width, float height)
+        {
+            X = position.X;
+            Y = position.Y;
+            Width = width;
+            Height = height;
+        }
+
+        /// <summary>
         /// a operator used for casting Rectangles.
         /// </summary>
         /// <param name="br"></param>
