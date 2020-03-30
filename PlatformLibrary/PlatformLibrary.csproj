@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.7.1.189, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -50,6 +53,7 @@
     <Compile Include="Tile.cs" />
     <Compile Include="Tilemap.cs" />
     <Compile Include="TilemapLayer.cs" />
+    <Compile Include="TilemapObject.cs" />
     <Compile Include="TilemapReader.cs" />
     <Compile Include="Tileset.cs" />
     <Compile Include="TilesetReader.cs" />

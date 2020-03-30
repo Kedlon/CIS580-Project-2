@@ -38,6 +38,7 @@ namespace Dodgeball
         SoundEffect playerHitSFX;
         SpriteFont spriteFont;
 
+        
         List<Platform> platforms;
         AxisList world;
 
@@ -45,6 +46,8 @@ namespace Dodgeball
         Tilemap tilemap;
 
         public Random Random = new Random();
+
+        
 
         KeyboardState oldKeyboardState;
         KeyboardState newKeyboardState;
@@ -59,6 +62,7 @@ namespace Dodgeball
                 balls[i] = new Ball(this);
             }
             _lives = 3;
+            
         }
 
         /// <summary>
@@ -102,13 +106,12 @@ namespace Dodgeball
             // Load the tilemap
             tilemap = Content.Load<Tilemap>("level1");
 
-
-
+            
             // Create the player with the corresponding frames from the spritesheet
             var playerFrames = from index in Enumerable.Range(49, 60) select sheet[index];
             player = new Player(playerFrames);
 
-            
+
             // Create the platforms
             //platforms.Add(new Platform(new BoundingRectangle(80, 300, 105, 21), sheet[1]));
             //platforms.Add(new Platform(new BoundingRectangle(280, 400, 84, 21), sheet[2]));
@@ -170,6 +173,17 @@ namespace Dodgeball
                         item.Bounds.X += 2 * delta;
                         playerHitSFX.Play();
                         _lives--;
+                    }
+                }
+
+                foreach (TilemapObject item in tilemap.Objects)
+                {
+                    if(item.Type == "Platform")
+                    {
+                        if(player.Bounds.CollidesWith(new BoundingRectangle(item.X, item.Y, item.Width, item.Height)))
+                        {
+                            player.Position.Y = item.Y;
+                        }
                     }
                 }
 

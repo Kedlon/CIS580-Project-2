@@ -109,7 +109,7 @@ namespace Dodgeball
         /// <summary>
         /// Gets and sets the position of the player on-screen
         /// </summary>
-        public Vector2 Position = new Vector2(100, 100);
+        public Vector2 Position = new Vector2(100, 50);
 
         /// <summary>
         /// The Bounds for this player
@@ -181,9 +181,9 @@ namespace Dodgeball
                 case VerticalMovementState.Falling:
                     Position.Y += PLAYER_SPEED;
                     // TODO: This needs to be replaced with collision logic
-                    if (Position.Y > 500)
+                    if (Position.Y >= 300)
                     {
-                        Position.Y = 500;
+                        Position.Y = 300;
                     }
                     break;
             }

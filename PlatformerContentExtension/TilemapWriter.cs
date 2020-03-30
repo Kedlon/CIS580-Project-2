@@ -52,6 +52,20 @@ namespace PlatformerContentExtension
                 }
             }
 
+            output.Write(value.ObjectGroups.Count);
+            foreach (var groups in value.ObjectGroups)
+            {
+                output.Write(groups.Objects.Count);
+                foreach (var singleObject in groups.Objects)
+                {
+                    output.Write(singleObject.Type);
+                    output.Write(singleObject.X);
+                    output.Write(singleObject.Y);
+                    output.Write(singleObject.ObjectWidth);
+                    output.Write(singleObject.ObjectHeight);
+                }
+            }
+
             // Write the tileset data 
             output.Write(value.Tilesets.Count);
             foreach (var tileset in value.Tilesets)
@@ -59,6 +73,8 @@ namespace PlatformerContentExtension
                 output.Write(tileset.FirstGID);
                 output.WriteExternalReference(tileset.Reference);
             }
+
+            
         }
 
         /// <summary>

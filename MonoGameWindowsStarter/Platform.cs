@@ -45,6 +45,7 @@ namespace Dodgeball
             tileCount = (int)bounds.Width / sprite.Width;
         }
 
+
         /// <summary>
         /// Draws the platform
         /// </summary>

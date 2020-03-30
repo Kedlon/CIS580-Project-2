@@ -82,13 +82,13 @@ namespace PlatformerContentExtension
                 });
             }
 
-            // A tilemap will have one or more layers
+            // A tilemap will have one or more object groups
             XmlNodeList groups = map.SelectNodes("//objectgroup");
             foreach (XmlNode item in layers)
             {
                 var id = uint.Parse(item.Attributes["id"].Value);
                 var name = item.Attributes["name"].Value;
-                var groupObjects = new List<TilemapObject>();
+                var groupObjects = new List<TilemapObjectContent>();
 
                 XmlNodeList objects = map.SelectNodes("//object");
                 foreach (XmlNode node in objects)
@@ -100,7 +100,7 @@ namespace PlatformerContentExtension
                     var width = float.Parse(node.Attributes["width"].Value);
                     var height = float.Parse(node.Attributes["height"].Value);
 
-                    groupObjects.Add(new TilemapObject()
+                    groupObjects.Add(new TilemapObjectContent()
                     {
                         Id = objectId,
                         Type = type,
@@ -109,11 +109,9 @@ namespace PlatformerContentExtension
                         ObjectWidth = width,
                         ObjectHeight = height
                     });
-
-                    
                 }
 
-                output.Objects.Add(new TilemapObjectGroup()
+                output.ObjectGroups.Add(new TilemapObjectGroup()
                 {
                     Id = id,
                     Name = name,

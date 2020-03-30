@@ -12,6 +12,6 @@ namespace PlatformerContentExtension
 
         public string Name { get; set; }
 
-        public List<TilemapObject> Objects = new List<TilemapObject>();
+        public List<TilemapObjectContent> Objects = new List<TilemapObjectContent>();
     }
 }

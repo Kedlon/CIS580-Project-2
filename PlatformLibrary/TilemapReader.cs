@@ -46,6 +46,23 @@ namespace PlatformLibrary
                 //layersByName[layerName] = layers[i];
             }
 
+            var ObjectGroupCount = input.ReadUInt32();
+            var Objects = new List<TilemapObject>();
+            for(var i = 0; i < ObjectGroupCount; i++)
+            {
+                var ObjectCount = input.ReadUInt32();
+                for(var j = 0; j < ObjectCount; j++)
+                {
+                    var type = input.ReadString();
+                    var x = input.ReadSingle();
+                    var y = input.ReadSingle();
+                    var width = input.ReadSingle();
+                    var height = input.ReadSingle();
+
+                    Objects.Add(new TilemapObject(type, x, y, width, height));
+                }
+            }
+
             // Read the tileset data
             var tiles = new List<Tile>() { new Tile() };
             var tilesetCount = input.ReadInt32();
@@ -62,7 +79,7 @@ namespace PlatformLibrary
             }
 
             // Construct and return the tilemap
-            return new Tilemap(mapWidth, mapHeight, tileWidth, tileHeight, layers, tiles.ToArray());
+            return new Tilemap(mapWidth, mapHeight, tileWidth, tileHeight, layers, tiles.ToArray(), Objects.ToArray());
         }
     }
 }

@@ -8,10 +8,8 @@ namespace PlatformerContentExtension
 {
 
 
-    public class TilemapObject
+    public class TilemapObjectContent
     {
-        
-
         public uint Id { get; set; }
 
         public string Type { get; set; }
