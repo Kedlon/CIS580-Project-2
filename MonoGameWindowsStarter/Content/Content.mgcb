@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\PlatformerContentExtension\bin\Debug\PlatformerContentExtension.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -24,13 +25,18 @@
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Hit_Hurt.wav;Hit_Player.wav
+/build:Hit_Hurt.wav
 
 #begin Laser_Shoot2.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Laser_Shoot2.wav;Hit_Wall.wav
+/build:Laser_Shoot2.wav
+
+#begin level1.tmx
+/importer:TilemapImporter
+/processor:TilemapProcessor
+/build:level1.tmx
 
 #begin pixel.png
 /importer:TextureImporter
@@ -59,7 +65,7 @@
 #begin spritesheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
-/processorParam:ColorKeyColor=94,129,162,255
+/processorParam:ColorKeyColor=255,0,255,255
 /processorParam:ColorKeyEnabled=True
 /processorParam:GenerateMipmaps=False
 /processorParam:PremultiplyAlpha=True
@@ -67,4 +73,9 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:spritesheet.png
+
+#begin tiledspritesheet.tsx
+/importer:TilesetImporter
+/processor:TilesetProcessor
+/build:tiledspritesheet.tsx
 

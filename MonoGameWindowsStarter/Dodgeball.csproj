@@ -47,7 +47,6 @@
     <Compile Include="BoundingRectangle.cs" />
     <Compile Include="Collisions.cs" />
     <Compile Include="Game1.cs" />
-    <Compile Include="FieldLine.cs" />
     <Compile Include="IBoundable.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Player.cs" />
@@ -59,6 +58,10 @@
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="PlatformLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\OneDrive\Desktop\platformer-windows-example-master\PlatformLibrary\bin\Debug\PlatformLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />

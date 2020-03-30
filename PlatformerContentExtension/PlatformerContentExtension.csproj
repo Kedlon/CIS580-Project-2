@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PlatformLibrary">
+      <HintPath>..\PlatformLibrary\bin\Debug\PlatformLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MSBuildExtensionsPath)\MonoGame\v3.0\Tools\MonoGame.Framework.dll</HintPath>
@@ -52,12 +55,6 @@
     <Compile Include="TilesetImporter.cs" />
     <Compile Include="TilesetProcessor.cs" />
     <Compile Include="TilesetWriter.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PlatformLibrary\PlatformLibrary.csproj">
-      <Project>{5205da9a-b8c2-44f1-a6ae-4eec30983b4f}</Project>
-      <Name>PlatformLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

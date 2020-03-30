@@ -109,7 +109,7 @@ namespace Dodgeball
         /// <summary>
         /// Gets and sets the position of the player on-screen
         /// </summary>
-        public Vector2 Position = new Vector2(200, 490);
+        public Vector2 Position = new Vector2(100, 100);
 
         /// <summary>
         /// The Bounds for this player

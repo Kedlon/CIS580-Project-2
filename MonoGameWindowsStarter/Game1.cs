@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using PlatformLibrary;
 
 namespace Dodgeball
 {
@@ -39,6 +40,9 @@ namespace Dodgeball
 
         List<Platform> platforms;
         AxisList world;
+
+        Tileset tileset;
+        Tilemap tilemap;
 
         public Random Random = new Random();
 
@@ -95,15 +99,19 @@ namespace Dodgeball
             var t = Content.Load<Texture2D>("spritesheet");
             sheet = new SpriteSheet(t, 21, 21, 3, 2);
 
+            // Load the tilemap
+            tilemap = Content.Load<Tilemap>("level1");
+
             // Create the player with the corresponding frames from the spritesheet
             var playerFrames = from index in Enumerable.Range(49, 60) select sheet[index];
             player = new Player(playerFrames);
 
+            
             // Create the platforms
             //platforms.Add(new Platform(new BoundingRectangle(80, 300, 105, 21), sheet[1]));
             //platforms.Add(new Platform(new BoundingRectangle(280, 400, 84, 21), sheet[2]));
             //platforms.Add(new Platform(new BoundingRectangle(160, 200, 42, 21), sheet[3]));
-            platforms.Add(new Platform(new BoundingRectangle(0, 500, 2100, 21), sheet[1]));
+            //platforms.Add(new Platform(new BoundingRectangle(0, 500, 2100, 21), sheet[1]));
 
             // Add the platforms to the axis list
             world = new AxisList();
@@ -111,6 +119,8 @@ namespace Dodgeball
             {
                 world.AddGameObject(platform);
             }
+
+            tileset = Content.Load<Tileset>("tiledspritesheet");
         }
 
         /// <summary>
@@ -160,7 +170,9 @@ namespace Dodgeball
                     }
                 }
 
-                
+                base.Update(gameTime);
+
+
             }
             //if the player loses
             else
@@ -190,6 +202,9 @@ namespace Dodgeball
             var t = Matrix.CreateTranslation(offset.X, offset.Y, 0);
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, t);
 
+            // Draw the tilemap
+            tilemap.Draw(spriteBatch);
+
             // Draw the platforms 
             var platformQuery = world.QueryRange(player.Position.X - 221, player.Position.X + 400);
             foreach (Platform platform in platformQuery)
@@ -198,10 +213,13 @@ namespace Dodgeball
             }
             Debug.WriteLine($"{platformQuery.Count()} Platforms rendered");
 
+            // Draw the balls
             foreach (Ball item in balls)
             {
                 item.Draw(spriteBatch);
             }
+
+            // Draw the player
             player.Draw(spriteBatch);
 
             // Draw an arbitrary range of sprites
