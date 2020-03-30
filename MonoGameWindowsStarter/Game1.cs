@@ -45,6 +45,8 @@ namespace Dodgeball
         Tileset tileset;
         Tilemap tilemap;
 
+        Texture2D texture;
+
         public Random Random = new Random();
 
         
@@ -62,7 +64,6 @@ namespace Dodgeball
                 balls[i] = new Ball(this);
             }
             _lives = 3;
-            
         }
 
         /// <summary>
@@ -92,6 +93,7 @@ namespace Dodgeball
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            texture = Content.Load<Texture2D>("pixel");
             foreach (Ball item in balls)
             {
                 item.LoadContent(Content);
@@ -156,10 +158,13 @@ namespace Dodgeball
             //loop that keeps the game going when lives are still available.
             if(_lives != 0)
             {
+                player.CheckForObjectCollision(tilemap.Objects);
                 player.Update(gameTime);
 
                 var platformQuery = world.QueryRange(player.Bounds.X, player.Bounds.X + player.Bounds.Width);
-                player.CheckForPlatformCollision(platformQuery);
+                //player.CheckForPlatformCollision(platformQuery);
+
+                
 
                 //update calls for each ball
                 foreach (Ball item in balls)
@@ -173,17 +178,6 @@ namespace Dodgeball
                         item.Bounds.X += 2 * delta;
                         playerHitSFX.Play();
                         _lives--;
-                    }
-                }
-
-                foreach (TilemapObject item in tilemap.Objects)
-                {
-                    if(item.Type == "Platform")
-                    {
-                        if(player.Bounds.CollidesWith(new BoundingRectangle(item.X, item.Y, item.Width, item.Height)))
-                        {
-                            player.Position.Y = item.Y;
-                        }
                     }
                 }
 
@@ -243,6 +237,12 @@ namespace Dodgeball
             for (var i = 17; i < 30; i++)
             {
                 sheet[i].Draw(spriteBatch, new Vector2(i * 25, 25), Color.White);
+            }
+
+            foreach(TilemapObject item in tilemap.Objects)
+            {
+                Rectangle rect = new BoundingRectangle(item.X, item.Y, item.Width, item.Height);
+                spriteBatch.Draw(texture, rect, Color.Red);
             }
 
             var textPosition = new Vector2(player.Position.X - 300, player.Position.Y - 375);

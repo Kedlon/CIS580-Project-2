@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
+using PlatformLibrary;
 
 namespace Dodgeball
 {
@@ -166,6 +167,7 @@ namespace Dodgeball
             switch (verticalState)
             {
                 case VerticalMovementState.OnGround:
+                    Debug.WriteLine("OnGround");
                     if (keyboard.IsKeyDown(Keys.Space))
                     {
                         verticalState = VerticalMovementState.Jumping;
@@ -173,6 +175,7 @@ namespace Dodgeball
                     }
                     break;
                 case VerticalMovementState.Jumping:
+                    Debug.WriteLine("Jumping");
                     jumpTimer += gameTime.ElapsedGameTime;
                     // Simple jumping with platformer physics
                     Position.Y -= (250 / (float)jumpTimer.TotalMilliseconds);
@@ -180,10 +183,12 @@ namespace Dodgeball
                     break;
                 case VerticalMovementState.Falling:
                     Position.Y += PLAYER_SPEED;
+                    Debug.WriteLine("Falling");
+                    
                     // TODO: This needs to be replaced with collision logic
                     if (Position.Y >= 300)
                     {
-                        Position.Y = 300;
+                        Position.Y = 299;
                     }
                     break;
             }
@@ -265,18 +270,44 @@ namespace Dodgeball
             }
         }
 
-        public void CheckForPlatformCollision(IEnumerable<IBoundable> platforms)
+        //public void CheckForPlatformCollision(IEnumerable<IBoundable> platforms)
+        //{
+        //    Debug.WriteLine($"Checking collisions against {platforms.Count()} platforms");
+        //    if (verticalState != VerticalMovementState.Jumping)
+        //    {
+        //        verticalState = VerticalMovementState.Falling;
+        //        foreach (Platform platform in platforms)
+        //        {
+        //            if (Bounds.CollidesWith(platform.Bounds))
+        //            {
+        //                Position.Y = platform.Bounds.Y - 1;
+        //                verticalState = VerticalMovementState.OnGround;
+        //            }
+        //        }
+        //    }
+        //}
+
+        public void CheckForObjectCollision(TilemapObject[] objects)
         {
-            Debug.WriteLine($"Checking collisions against {platforms.Count()} platforms");
-            if (verticalState != VerticalMovementState.Jumping)
+            BoundingRectangle bounds;
+            //check for platform object collision
+            foreach(TilemapObject item in objects)
             {
-                verticalState = VerticalMovementState.Falling;
-                foreach (Platform platform in platforms)
+                bounds = new BoundingRectangle(item.X, item.Y, item.Width, item.Height);
+                if(item.Type == "Platform")
                 {
-                    if (Bounds.CollidesWith(platform.Bounds))
+                    if (verticalState != VerticalMovementState.Jumping)
                     {
-                        Position.Y = platform.Bounds.Y - 1;
-                        verticalState = VerticalMovementState.OnGround;
+                        if (Bounds.CollidesWith(bounds) && verticalState == VerticalMovementState.Falling)
+                        {
+                            jumpTimer = new TimeSpan(0);
+                            Position.Y = bounds.Y - 1;
+                            verticalState = VerticalMovementState.OnGround;
+                        }
+                        else
+                        {
+                            verticalState = VerticalMovementState.Falling;
+                        }
                     }
                 }
             }
