@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dodgeball", "MonoGameWindowsStarter\Dodgeball.csproj", "{C491FCEF-8215-49C9-A42D-400F6594F660}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5205DA9A-B8C2-44F1-A6AE-4EEC30983B4F} = {5205DA9A-B8C2-44F1-A6AE-4EEC30983B4F}
+		{90F19AF9-4EA3-4C7C-A304-F2A59B540AB7} = {90F19AF9-4EA3-4C7C-A304-F2A59B540AB7}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformerContentExtension", "PlatformerContentExtension\PlatformerContentExtension.csproj", "{90F19AF9-4EA3-4C7C-A304-F2A59B540AB7}"

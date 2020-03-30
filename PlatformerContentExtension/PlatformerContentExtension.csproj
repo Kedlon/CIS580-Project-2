@@ -49,6 +49,8 @@
     <Compile Include="TilemapContent.cs" />
     <Compile Include="TilemapImporter.cs" />
     <Compile Include="TilemapLayerContent.cs" />
+    <Compile Include="TilemapObject.cs" />
+    <Compile Include="TilemapObjectGroup.cs" />
     <Compile Include="TilemapProcessor.cs" />
     <Compile Include="TilemapWriter.cs" />
     <Compile Include="TilesetContent.cs" />

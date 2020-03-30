@@ -19,7 +19,7 @@ namespace Dodgeball
         /// <summary>
         /// number of balls that will be in the game.
         /// </summary>
-        const int _ballNumber = 3;
+        const int _ballNumber = 0;
 
         private int _lives;
 
@@ -102,6 +102,8 @@ namespace Dodgeball
             // Load the tilemap
             tilemap = Content.Load<Tilemap>("level1");
 
+
+
             // Create the player with the corresponding frames from the spritesheet
             var playerFrames = from index in Enumerable.Range(49, 60) select sheet[index];
             player = new Player(playerFrames);
@@ -115,6 +117,7 @@ namespace Dodgeball
 
             // Add the platforms to the axis list
             world = new AxisList();
+            
             foreach (Platform platform in platforms)
             {
                 world.AddGameObject(platform);
