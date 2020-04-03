@@ -48,6 +48,8 @@
     <Compile Include="Collisions.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="IBoundable.cs" />
+    <Compile Include="particle.cs" />
+    <Compile Include="ParticleSystem.cs" />
     <Compile Include="Platform.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />

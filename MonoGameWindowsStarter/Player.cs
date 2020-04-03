@@ -134,11 +134,12 @@ namespace Dodgeball
         /// Updates the state of the player, as well as movement, physics, and other aspects of the player.
         /// </summary>
         /// <param name="gameTime">The game's GameTime</param>
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, TilemapObject[] objects)
         {
             var keyboardState = Keyboard.GetState();
             UpdateVertical(gameTime, keyboardState);
             UpdateHorizontal(gameTime, keyboardState);
+            CheckForObjectCollision(gameTime, objects);
             ApplyAnimations(gameTime);
         }
 
@@ -287,7 +288,7 @@ namespace Dodgeball
         //    }
         //}
 
-        public void CheckForObjectCollision(TilemapObject[] objects)
+        private void CheckForObjectCollision(GameTime gameTime, TilemapObject[] objects)
         {
             BoundingRectangle bounds;
             //check for platform object collision
@@ -298,11 +299,15 @@ namespace Dodgeball
                 {
                     if (verticalState != VerticalMovementState.Jumping)
                     {
-                        if (Bounds.CollidesWith(bounds) && verticalState == VerticalMovementState.Falling)
+                        if (Bounds.CollidesWith(bounds))
                         {
-                            jumpTimer = new TimeSpan(0);
                             Position.Y = bounds.Y - 1;
-                            verticalState = VerticalMovementState.OnGround;
+                            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                            {
+
+                                verticalState = VerticalMovementState.Jumping;
+                                jumpTimer = new TimeSpan(0);
+                            }
                         }
                         else
                         {
@@ -310,6 +315,7 @@ namespace Dodgeball
                         }
                     }
                 }
+
             }
         }
     }

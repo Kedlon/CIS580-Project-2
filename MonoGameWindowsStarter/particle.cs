@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace ParticleSystemStarter
+namespace Dodgeball
 {
     /// <summary>
     /// A struct representing a single particle in a particle system

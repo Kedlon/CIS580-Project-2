@@ -37,13 +37,15 @@ namespace Dodgeball
         /// </summary>
         SoundEffect playerHitSFX;
         SpriteFont spriteFont;
-
         
         List<Platform> platforms;
         AxisList world;
 
         Tileset tileset;
         Tilemap tilemap;
+
+        ParticleSystem particleSystem;
+        Texture2D particleTexture;
 
         Texture2D texture;
 
@@ -128,6 +130,37 @@ namespace Dodgeball
                 world.AddGameObject(platform);
             }
 
+            particleTexture = Content.Load<Texture2D>("particle");
+            particleSystem = new ParticleSystem(this, 1000, particleTexture);
+            particleSystem.Emitter = new Vector2(player.Bounds.X, player.Bounds.Y);
+            particleSystem.SpawnPerFrame = 4;
+
+            Components.Add(particleSystem);
+
+            // Set the SpawnParticle method
+            particleSystem.SpawnParticle = (ref Particle particle) =>
+            {
+                MouseState mouse = Mouse.GetState();
+                particle.Position = new Vector2(player.Bounds.X, player.Bounds.Y);
+                particle.Velocity = new Vector2(
+                    MathHelper.Lerp(-50, 50, (float)Random.NextDouble()), // X between -50 and 50
+                    MathHelper.Lerp(0, 100, (float)Random.NextDouble()) // Y between 0 and 100
+                    );
+                particle.Acceleration = 0f * new Vector2(0, (float)-Random.NextDouble());
+                particle.Color = Color.Blue;
+                particle.Scale = 0.1f;
+                particle.Life = 1.0f;
+            };
+
+            // Set the UpdateParticle method
+            particleSystem.UpdateParticle = (float deltaT, ref Particle particle) =>
+            {
+                particle.Velocity += deltaT * particle.Acceleration;
+                particle.Position += deltaT * particle.Velocity;
+                particle.Scale -= deltaT;
+                particle.Life -= deltaT;
+            };
+
             tileset = Content.Load<Tileset>("tiledspritesheet");
         }
 
@@ -158,13 +191,8 @@ namespace Dodgeball
             //loop that keeps the game going when lives are still available.
             if(_lives != 0)
             {
-                player.CheckForObjectCollision(tilemap.Objects);
-                player.Update(gameTime);
-
-                var platformQuery = world.QueryRange(player.Bounds.X, player.Bounds.X + player.Bounds.Width);
-                //player.CheckForPlatformCollision(platformQuery);
-
-                
+                //player.CheckForObjectCollision(tilemap.Objects);
+                player.Update(gameTime, tilemap.Objects);
 
                 //update calls for each ball
                 foreach (Ball item in balls)
@@ -193,7 +221,8 @@ namespace Dodgeball
                     item.Velocity = Vector2.Zero;
                 }
             }
-            
+
+            particleSystem.Update(gameTime);
 
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
@@ -217,12 +246,12 @@ namespace Dodgeball
             tilemap.Draw(spriteBatch);
 
             // Draw the platforms 
-            var platformQuery = world.QueryRange(player.Position.X - 221, player.Position.X + 400);
-            foreach (Platform platform in platformQuery)
-            {
-                platform.Draw(spriteBatch);
-            }
-            Debug.WriteLine($"{platformQuery.Count()} Platforms rendered");
+            //var platformQuery = world.QueryRange(player.Position.X - 221, player.Position.X + 400);
+            //foreach (Platform platform in platformQuery)
+            //{
+            //    platform.Draw(spriteBatch);
+            //}
+            //Debug.WriteLine($"{platformQuery.Count()} Platforms rendered");
 
             // Draw the balls
             foreach (Ball item in balls)
@@ -233,17 +262,11 @@ namespace Dodgeball
             // Draw the player
             player.Draw(spriteBatch);
 
-            // Draw an arbitrary range of sprites
-            for (var i = 17; i < 30; i++)
-            {
-                sheet[i].Draw(spriteBatch, new Vector2(i * 25, 25), Color.White);
-            }
-
-            foreach(TilemapObject item in tilemap.Objects)
-            {
-                Rectangle rect = new BoundingRectangle(item.X, item.Y, item.Width, item.Height);
-                spriteBatch.Draw(texture, rect, Color.Red);
-            }
+            //foreach(TilemapObject item in tilemap.Objects)
+            //{
+            //    Rectangle rect = new BoundingRectangle(item.X, item.Y, item.Width, item.Height);
+            //    spriteBatch.Draw(texture, rect, Color.Red);
+            //}
 
             var textPosition = new Vector2(player.Position.X - 300, player.Position.Y - 375);
             //checks if the game is still active
@@ -255,6 +278,8 @@ namespace Dodgeball
             {
                 spriteBatch.DrawString(spriteFont, "Game Over, please close the game.", textPosition, Color.White);
             }
+            
+            particleSystem.Draw(gameTime);
 
             spriteBatch.End();
 
